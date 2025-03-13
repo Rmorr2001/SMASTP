@@ -1,0 +1,2 @@
+stochastic_objective,deterministic_objective,det_on_stoch_objective,value_of_stochastic_solution,vss_percentage,stochastic_tours,deterministic_tours,stochastic_processing_time,deterministic_processing_time,timing,speedup
+203858.0,inf,227880.0,24022.0,10.5415130770581,13,0,1.388801097869873,0.49344396591186523,"{'stochastic': {'setup': 0.17283082008361816, 'solve': 1.388843059539795, 'total': 1.5616834163665771}, 'deterministic': {'setup': 0.00487971305847168, 'solve': 0.49347496032714844, 'total': 0.4983639717102051}, 'evaluation': 0.36927008628845215}",3.133620215376814

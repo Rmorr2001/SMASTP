@@ -1,0 +1,2 @@
+num_employees,num_scenarios,stochastic_setup_time,stochastic_solve_time,stochastic_total_time,deterministic_setup_time,deterministic_solve_time,deterministic_total_time,evaluation_time,speedup_factor,stochastic_objective,deterministic_objective,det_on_stoch_objective,vss,vss_percentage
+20,3,0.3077712059020996,2.3305439949035645,2.638334035873413,0.00521087646484375,0.4066581726074219,0.411884069442749,0.2524857521057129,6.405525805945587,151948.3333333333,inf,246840.0,94891.66666666669,38.44258088910496

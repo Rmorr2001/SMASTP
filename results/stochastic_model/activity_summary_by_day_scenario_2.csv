@@ -1,0 +1,15 @@
+Day,Day Name,Activity,Avg Employees,Max Employees,Min Employees
+1,Mon,Activity 1,3.0,6,1
+1,Mon,Activity 2,2.326530612244898,6,1
+2,Tue,Activity 1,4.618421052631579,10,1
+2,Tue,Activity 2,3.176470588235294,9,1
+3,Wed,Activity 1,4.516129032258065,11,1
+3,Wed,Activity 2,3.2280701754385963,10,1
+4,Thu,Activity 1,4.16,10,1
+4,Thu,Activity 2,2.7142857142857144,8,1
+5,Fri,Activity 1,4.230769230769231,8,1
+5,Fri,Activity 2,2.6379310344827585,7,1
+6,Sat,Activity 1,4.453333333333333,10,1
+6,Sat,Activity 2,3.3255813953488373,8,1
+7,Sun,Activity 1,4.488095238095238,11,1
+7,Sun,Activity 2,2.3968253968253967,8,1
