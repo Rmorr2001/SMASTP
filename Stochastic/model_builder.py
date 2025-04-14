@@ -1,8 +1,8 @@
 import time
 import numpy as np
 import pyomo.environ as pyo
-from scenario_generator import ScenarioGenerator
-from tour_generator import TourGenerator
+from Stochastic.Utils.scenario_generator import ScenarioGenerator
+from Stochastic.Utils.tour_generator import TourGenerator
 
 class ModelBuilderMixin:
     def generate_shift_shells(self):
@@ -320,42 +320,67 @@ class ModelBuilderMixin:
             """Create a second-stage model for a specific scenario"""
             subproblem = pyo.ConcreteModel(name=f"Second-Stage-Scenario-{scenario_idx}")
             
-            # Copy sets
-            subproblem.Days = model.Days
-            subproblem.Periods = model.Periods
-            subproblem.Activities = model.Activities
+            # Create sets rather than copying them
+            subproblem.Days = pyo.RangeSet(1, self.num_days)
+            subproblem.Periods = pyo.RangeSet(1, self.num_periods)
+            subproblem.Activities = pyo.RangeSet(1, self.num_activities)
             
-            # Copy parameters for this scenario
+            # Store scenario data
             w = scenario_idx + 1
             
-            # Track first-stage variables
+            # Store demand data for this scenario
+            subproblem.demand = {(d, i, j): model.demand[w, d, i, j] 
+                               for d in subproblem.Days 
+                               for i in subproblem.Periods 
+                               for j in subproblem.Activities}
+            
+            # Track first-stage variables - use Pyomo Components instead of a dictionary
             subproblem.first_stage_vars = {}
             
             # Add variables
-            subproblem.y = pyo.Var(model.Days, model.Periods, model.Activities, 
+            subproblem.y = pyo.Var(subproblem.Days, subproblem.Periods, subproblem.Activities, 
                                  domain=pyo.NonNegativeIntegers)
             
-            subproblem.s_over = pyo.Var(model.Days, model.Periods, model.Activities, 
+            subproblem.s_over = pyo.Var(subproblem.Days, subproblem.Periods, subproblem.Activities, 
                                       domain=pyo.NonNegativeIntegers)
             
-            subproblem.s_under = pyo.Var(model.Days, model.Periods, model.Activities, 
+            subproblem.s_under = pyo.Var(subproblem.Days, subproblem.Periods, subproblem.Activities, 
                                        domain=pyo.NonNegativeIntegers)
             
-            # Map fixed first-stage variables
+            # Create individual parameters for each shift variable
             for s in model.ShiftShells:
-                subproblem.first_stage_vars[f"v[{s}]"] = pyo.Param(initialize=0, mutable=True)
+                param_name = f"v[{s}]"
+                param = pyo.Param(initialize=0, mutable=True)
+                subproblem.add_component(f"fs_var_{param_name.replace('[', '_').replace(']', '')}", param)
+                subproblem.first_stage_vars[param_name] = param
+            
+            # Store cost parameters
+            subproblem.c_allocation = {(d, i, j): model.c_allocation[d, i, j] 
+                                     for d in subproblem.Days 
+                                     for i in subproblem.Periods 
+                                     for j in subproblem.Activities}
+            
+            subproblem.c_over = {(d, i, j): model.c_over[d, i, j] 
+                               for d in subproblem.Days 
+                               for i in subproblem.Periods 
+                               for j in subproblem.Activities}
+            
+            subproblem.c_under = {(d, i, j): model.c_under[d, i, j] 
+                                for d in subproblem.Days 
+                                for i in subproblem.Periods 
+                                for j in subproblem.Activities}
             
             # Objective
             def subobj_rule(subproblem):
                 return (
                     # Activity allocation costs
-                    sum(model.c_allocation[d, i, j] * subproblem.y[d, i, j] 
+                    sum(subproblem.c_allocation[d, i, j] * subproblem.y[d, i, j] 
                         for d in subproblem.Days for i in subproblem.Periods for j in subproblem.Activities) +
                     # Overcovering costs
-                    sum(model.c_over[d, i, j] * subproblem.s_over[d, i, j] 
+                    sum(subproblem.c_over[d, i, j] * subproblem.s_over[d, i, j] 
                         for d in subproblem.Days for i in subproblem.Periods for j in subproblem.Activities) +
                     # Undercovering costs
-                    sum(model.c_under[d, i, j] * subproblem.s_under[d, i, j] 
+                    sum(subproblem.c_under[d, i, j] * subproblem.s_under[d, i, j] 
                         for d in subproblem.Days for i in subproblem.Periods for j in subproblem.Activities)
                 )
             
@@ -364,7 +389,7 @@ class ModelBuilderMixin:
             # Constraints
             def sub_demand_rule(subproblem, d, i, j):
                 return (subproblem.y[d, i, j] + subproblem.s_under[d, i, j] - 
-                        subproblem.s_over[d, i, j] == model.demand[w, d, i, j])
+                        subproblem.s_over[d, i, j] == subproblem.demand[d, i, j])
             
             subproblem.DemandSatisfaction = pyo.Constraint(subproblem.Days, subproblem.Periods, 
                                                          subproblem.Activities, rule=sub_demand_rule)
@@ -379,7 +404,9 @@ class ModelBuilderMixin:
                         active_shifts.append(s_idx)
                 
                 total_employees_assigned = sum(subproblem.y[d, i, j] for j in subproblem.Activities)
-                total_employees_working = sum(subproblem.first_stage_vars[f"v[{s}]"] for s in active_shifts)
+                
+                # Get the value of each shift parameter directly from the component
+                total_employees_working = sum(pyo.value(subproblem.first_stage_vars[f"v[{s}]"]) for s in active_shifts)
                 
                 return total_employees_assigned == total_employees_working
             

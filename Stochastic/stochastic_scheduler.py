@@ -4,16 +4,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-from grammar import ContextFreeGrammar
+from Stochastic.grammar import ContextFreeGrammar
 
-
-
+import os
+import random
+import numpy as np
 
 # Import our decomposed functionality
-from model_builder import ModelBuilderMixin
-from solver import SolverMixin
-from visualization import VisualizationMixin
-from reporting import ReportingMixin
+from Stochastic.model_builder import ModelBuilderMixin
+from Stochastic.solver import SolverMixin
+from Main_Utils.visualization import VisualizationMixin
+from Stochastic.Utils.reporting import ReportingMixin
 
 class StochasticTourSchedulingModel(ModelBuilderMixin, SolverMixin, VisualizationMixin, ReportingMixin):
     """
@@ -78,3 +79,70 @@ class StochasticTourSchedulingModel(ModelBuilderMixin, SolverMixin, Visualizatio
         
         # Create and return the grammar
         return ContextFreeGrammar(terminal_symbols, non_terminal_symbols, 'S', productions)
+    
+
+def run_stochastic_model(seed=42, num_employees=10, num_scenarios=5, output_dir='./results'):
+    """
+    Run the enhanced stochastic model with visualization and reporting
+    
+    Args:
+        seed: Random seed for reproducibility
+        num_employees: Number of employees to schedule
+        num_scenarios: Number of scenarios to generate
+        output_dir: Directory to save results
+    
+    Returns:
+        Tuple of (model, solution)
+    """
+    # Set random seed for reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Create output directory
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create model
+    print("Initializing model...")
+    model = StochasticTourSchedulingModel(
+        num_days=7,        # 7-day planning horizon
+        num_periods=96,    # 15-minute intervals (24h × 4 periods/hour)
+        num_activities=2,  # 2 work activities
+        num_employees=num_employees
+    )
+    
+    # Generate shift shells
+    model.generate_shift_shells()
+    
+    # Generate tours
+    model.generate_tours(max_tours=1000)
+    
+    # Generate scenarios
+    model.generate_scenarios(num_scenarios=num_scenarios)
+    
+    # Solve model
+    print("\nSolving model...")
+    solution = model.solve(
+        num_scenarios=num_scenarios, 
+        method='multi_cut_L_shaped',
+        time_limit=1800  # 30 minutes time limit
+    )
+    
+    # Print results
+    print("\nSolution Status:")
+    print(f"Objective Value: {solution['objective_value']:.2f}")
+    print(f"Optimality Gap: {solution['gap']*100:.2f}%")
+    
+    print("\nTour Assignments:")
+    for tour, count in sorted(solution['tour_assignments'].items()):
+        print(f"Tour {tour}: {count} employees")
+    
+    # Visualize solution
+    model.visualize_solution(output_dir)
+    
+    # Generate reports
+    model.generate_reports(output_dir)
+    
+    # Export solution
+    model.export_solution(os.path.join(output_dir, 'solution.pkl'))
+    
+    return model, solution

@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 # Import from main.py
-from main import view_tours, view_tour_details, StochasticTourSchedulingModel
+from main import StochasticTourSchedulingModel
+from Main_Utils.utils_tourviews import view_tours, view_tour_details
 
 def load_model(model_path=None):
     """

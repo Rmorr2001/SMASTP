@@ -1,8 +1,7 @@
 import pandas as pd
 import os
 import pickle
-import time
-from collections import defaultdict
+
 
 class ReportingMixin:
     def export_solution(self, filename):

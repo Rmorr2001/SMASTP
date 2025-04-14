@@ -1,8 +1,8 @@
 Day,Day Name,Total Employees,Unique Shifts
-1,Mon,12,6
-2,Tue,20,8
-3,Wed,16,6
-4,Thu,18,8
-5,Fri,17,6
-6,Sat,18,8
-7,Sun,19,8
+1,Mon,6,4
+2,Tue,10,6
+3,Wed,8,4
+4,Thu,9,5
+5,Fri,7,4
+6,Sat,10,6
+7,Sun,10,6
