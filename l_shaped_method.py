@@ -239,18 +239,7 @@ class MultiCutLShapedMethod:
                 
         return dual_values
     
-    def _generate_optimality_cut(self, model, dual_values, first_stage_vars):
-        """Generate an optimality cut based on dual values"""
-        # Implementation would depend on the specific structure of the model
-        # Here we generate a generic cut
-        cut = {
-            'type': 'optimality',
-            'dual_values': dual_values,
-            'rhs': sum(dual_values.get(c, 0) * v for c, v in first_stage_vars.items())
-        }
-        
-        return cut
-    
+
     def _add_cuts_to_master(self, master, cuts, scenario_idx):
         """Add cuts to the master problem"""
         for cut_idx, cut in enumerate(cuts):
@@ -281,17 +270,6 @@ class MultiCutLShapedMethod:
         else:
             # Feasibility cut
             return None
-    
-    def _calculate_upper_bound(self, first_stage_vars, scenarios):
-        """Calculate current upper bound based on subproblem solutions"""
-        # Upper bound = first stage cost + expected second stage cost
-        first_stage_cost = sum(v for k, v in first_stage_vars.items() if k.startswith('first_stage_cost'))
-        
-        # Expected second-stage cost would typically be calculated here
-        # This is a placeholder for simplicity
-        expected_second_stage_cost = 1000.0  # Placeholder
-        
-        return first_stage_cost + expected_second_stage_cost
     
     def _calculate_gap(self):
         """Calculate the optimality gap"""

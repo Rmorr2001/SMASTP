@@ -527,7 +527,7 @@ if __name__ == "__main__":
     # Compare stochastic vs. deterministic approaches
     comparison = compare_stochastic_vs_deterministic(
         seed=42,
-        num_employees=40,
+        num_employees=20,
         num_scenarios=5,
         output_dir='results/comparison'
     )

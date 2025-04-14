@@ -1,6 +1,7 @@
 import time
 import pyomo.environ as pyo
 from l_shaped_method import MultiCutLShapedMethod
+
 class SolverMixin:
     def solve(self, num_scenarios=5, method='deterministic_equivalent', solver='cbc', time_limit=3600):
         """
@@ -9,7 +10,7 @@ class SolverMixin:
         Args:
             num_scenarios: Number of scenarios to generate
             method: Solution method ('deterministic_equivalent' or 'multi_cut_L_shaped')
-            solver: Solver to use ('cbc', 'gurobi', or 'cbc')
+            solver: Solver to use ('cbc', 'glpk', or 'cbc')
             time_limit: Time limit in seconds
             
         Returns:
